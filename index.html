@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Healthy Life</title>
+<link href="https://fonts.googleapis.com" rel="preconnect" />
+<link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --background:#0b1326;--surface:#171f33;--surface-low:#131b2e;--surface-high:#222a3d;--surface-highest:#2d3449;
+    --border:#3c4947;--on-surface:#dae2fd;--on-surface-variant:#bbcac6;
+    --primary:#4fdbc8;--on-primary:#003731;--secondary:#44e2cd;--tertiary:#7bd0ff;--error:#ffb4ab;
+    padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--background);color:var(--on-surface);font-family:'Plus Jakarta Sans',sans-serif;min-height:100%;}
+  .disp{font-family:'Space Grotesk',sans-serif}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+  header.bar{border-bottom:1px solid var(--border);background:var(--surface-low);position:sticky;top:0;z-index:5;padding-top:env(safe-area-inset-top,0px)}
+  .barin{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 16px}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1.1rem}
+  .brand span{color:var(--primary)}
+  nav.links{display:flex;gap:4px;flex-wrap:wrap}
+  nav.links a{padding:8px 12px;border-radius:10px;font-size:.9rem;font-weight:500;color:var(--on-surface-variant)}
+  nav.links a.active{background:var(--primary);color:var(--on-primary)}
+  nav.links a:hover:not(.active){background:var(--surface-high);color:var(--on-surface)}
+  .userbox{display:flex;align-items:center;gap:10px;font-size:.9rem}
+  .userbox span{color:var(--on-surface-variant);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  button,.btn{cursor:pointer;font-family:inherit}
+  .btn-primary{height:44px;padding:0 18px;border-radius:10px;background:var(--primary);color:var(--on-primary);font-weight:600;border:none}
+  .btn-primary:disabled{opacity:.6;cursor:default}
+  .btn-ghost{height:36px;padding:0 12px;border-radius:10px;background:var(--surface-high);color:var(--on-surface);border:none}
+  .btn-sub{height:40px;padding:0 16px;border-radius:10px;background:var(--secondary);color:var(--on-primary);font-weight:600;border:none}
+  input,select{background:var(--background);border:1px solid var(--border);color:var(--on-surface);border-radius:10px;padding:0 14px;height:44px;font-family:inherit;font-size:.95rem;width:100%}
+  input:focus,select:focus{outline:none;border-color:var(--primary)}
+  label{display:block;font-size:.85rem;margin-bottom:6px;color:var(--on-surface-variant)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:22px}
+  .pill{border-radius:14px;border:1px solid var(--border);background:var(--surface-low);padding:14px;cursor:pointer;text-align:left;color:var(--on-surface);font-family:inherit;font-size:.95rem;width:100%}
+  .pill.sel{border-color:var(--primary);background:rgba(79,219,200,.1)}
+  main{min-height:70vh}
+  .grid3{display:grid;grid-template-columns:2fr 1fr;gap:22px}
+  @media (max-width:860px){.grid3{grid-template-columns:1fr}}
+  .stack{display:flex;flex-direction:column;gap:16px}
+  .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:600px){.row3{grid-template-columns:1fr}}
+  .muted{color:var(--on-surface-variant)}
+  .loginwrap{min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;padding:24px}
+  .loginbox{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:30px}
+  .badge{font-size:.72rem;color:var(--primary);border:1px solid rgba(79,219,200,.3);background:rgba(79,219,200,.1);border-radius:999px;padding:4px 10px}
+  .err{color:var(--error);font-size:.9rem}
+  .ok{color:var(--primary);font-size:.9rem}
+  .kpi{background:var(--surface-low);border-radius:12px;padding:12px}
+  .kpi p:first-child{font-size:.75rem;color:var(--on-surface-variant);margin:0 0 4px}
+  .kpi p:last-child{margin:0;font-weight:600;font-family:'Space Grotesk',sans-serif}
+  .goalbox{background:rgba(79,219,200,.1);border:1px solid rgba(79,219,200,.3);border-radius:12px;padding:12px;margin-top:14px}
+  .bar-outer{height:6px;background:var(--surface-high);border-radius:999px;overflow:hidden;margin-top:8px}
+  .bar-inner{height:100%;background:var(--primary)}
+  ul.entries{list-style:none;margin:0;padding:0}
+  ul.entries li{padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  ul.entries li:last-child{border-bottom:none}
+  .tag{font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;color:var(--on-surface-variant);margin-right:8px}
+  .ring{width:110px;height:110px;border-radius:50%;border:4px solid var(--primary);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+  .ring b{font-family:'Space Grotesk',sans-serif;font-size:1.4rem}
+  .ring small{font-size:.65rem;color:var(--on-surface-variant)}
+  .macros{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media (max-width:600px){.macros{grid-template-columns:1fr}}
+  .macros>div{background:var(--surface-low);border-radius:14px;padding:16px;text-align:center}
+  .macros b{display:block;font-family:'Space Grotesk',sans-serif;font-size:1.5rem}
+  .quickrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .quickrow input{flex:1;min-width:140px}
+  .quickrow select{width:auto}
+  .datein{width:auto;height:40px}
+  .trkhead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+  .trendchart{display:flex;align-items:flex-end;gap:8px;height:150px;margin-top:14px}
+  .trendbar{flex:1;background:var(--surface-low);border-radius:6px 6px 0 0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
+  .trendbar .fill{background:var(--primary);border-radius:6px 6px 0 0;width:100%;min-height:2px}
+  .trendbar .fill.over{background:var(--tertiary)}
+  .trendbar .val{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:.65rem;color:var(--on-surface-variant)}
+  .trendlbl{display:flex;gap:8px;margin-top:6px}
+  .trendlbl span{flex:1;text-align:center;font-size:.68rem;color:var(--on-surface-variant)}
+  code{background:var(--surface-low);border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-size:.85em}
+  .center{display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div id="app" class="center" style="min-height:100vh"><p class="muted">กำลังโหลด...</p></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ================= Supabase connection =================
+  const CFG_KEY = "hl_supabase_cfg"; // {url, key}
+  function getCfg(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){ return null; } }
+  function setCfg(url, key){ localStorage.setItem(CFG_KEY, JSON.stringify({ url, key })); }
+  function clearCfg(){ localStorage.removeItem(CFG_KEY); }
+
+  let sb = null;
+  function initClient(){
+    const cfg = getCfg();
+    if(!cfg || !cfg.url || !cfg.key) return null;
+    try{ return window.supabase.createClient(cfg.url, cfg.key); }catch(e){ return null; }
+  }
+
+  // ================= calculations (unchanged) =================
+  const ACTIVITY_MULTIPLIERS = { sedentary:1.2, light:1.375, moderate:1.55, active:1.725, extra_active:1.9 };
+  const ACTIVITY_LABELS = {
+    sedentary:"นั่งทำงานเป็นหลัก (Sedentary)",
+    light:"ออกกำลังกายเบาๆ (Lightly Active)",
+    moderate:"ออกกำลังกายปานกลาง (Moderately Active)",
+    active:"ออกกำลังกายหนัก (Very Active)",
+    extra_active:"กิจกรรมนักกีฬาระดับแข่งขัน (Extra Active)"
+  };
+  const GOAL_ADJUSTMENT = { lose:-400, maintain:0, gain:350 };
+  function calcBMI(w,h){ const m=h/100; if(m<=0) return 0; return +(w/(m*m)).toFixed(1); }
+  function bmiCategory(bmi){
+    if(bmi<18.5) return { label:"น้ำหนักน้อย", color:"#38bdf8" };
+    if(bmi<23) return { label:"สมส่วน (Normal)", color:"#2dd4bf" };
+    if(bmi<25) return { label:"น้ำหนักเกิน", color:"#facc15" };
+    return { label:"โรคอ้วน", color:"#fb7185" };
+  }
+  function calcBMR(sex,w,h,age){
+    const base = 10*w + 6.25*h - 5*age;
+    if(sex==="male") return Math.round(base+5);
+    if(sex==="female") return Math.round(base-161);
+    return Math.round(base-78);
+  }
+  function calcTDEE(bmr, activity){ return Math.round(bmr*ACTIVITY_MULTIPLIERS[activity]); }
+  function calcGoalCalories(tdee, goal){ return Math.max(1200, tdee+GOAL_ADJUSTMENT[goal]); }
+  function calcMacros(cal){ return { proteinG:Math.round(cal*0.3/4), carbsG:Math.round(cal*0.4/4), fatG:Math.round(cal*0.3/9) }; }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+
+  // ================= data layer (Supabase) =================
+  async function getProfile(userId){
+    const { data } = await sb.from("profiles").select("*").eq("id", userId).maybeSingle();
+    return data;
+  }
+  async function saveProfile(userId, p){
+    return sb.from("profiles").upsert({ id:userId, ...p, updated_at:new Date().toISOString() });
+  }
+  async function getLog(userId, date){
+    const { data } = await sb.from("daily_logs").select("*").eq("user_id",userId).eq("log_date",date).maybeSingle();
+    return data || { log_date:date, calories_consumed:0, water_ml:0, sleep_hours:0, exercise_minutes:0, exercise_kcal:0 };
+  }
+  async function saveLog(userId, date, log){
+    const { data } = await sb.from("daily_logs").upsert({ ...log, user_id:userId, log_date:date }, { onConflict:"user_id,log_date" }).select().maybeSingle();
+    return data;
+  }
+  async function getEntries(dailyLogId){
+    if(!dailyLogId) return [];
+    const { data } = await sb.from("log_entries").select("*").eq("daily_log_id", dailyLogId).order("created_at",{ ascending:true });
+    return data || [];
+  }
+  async function addEntry(userId, dailyLogId, entry_type, title, calories){
+    const { data } = await sb.from("log_entries").insert({ daily_log_id:dailyLogId, user_id:userId, entry_type, title, calories }).select().maybeSingle();
+    return data;
+  }
+  async function deleteEntry(id){ return sb.from("log_entries").delete().eq("id", id); }
+  async function getRecentLogs(userId, days){
+    const since = new Date(); since.setDate(since.getDate() - (days - 1));
+    const sinceStr = since.toISOString().slice(0,10);
+    const { data } = await sb.from("daily_logs").select("log_date,calories_consumed")
+      .eq("user_id", userId).gte("log_date", sinceStr).order("log_date",{ ascending:true });
+    return data || [];
+  }
+  async function getLogsForExport(userId, days){
+    const since = new Date(); since.setDate(since.getDate() - (days - 1));
+    const sinceStr = since.toISOString().slice(0,10);
+    const { data } = await sb.from("daily_logs").select("*")
+      .eq("user_id", userId).gte("log_date", sinceStr).order("log_date",{ ascending:true });
+    return data || [];
+  }
+  function downloadCSV(rows, filename){
+    const headers = ["log_date","calories_consumed","water_ml","sleep_hours","exercise_minutes","exercise_kcal"];
+    const csv = [headers.join(",")].concat(rows.map(r=>headers.map(h=>r[h]??"").join(","))).join("\n");
+    const blob = new Blob(["\uFEFF"+csv], { type:"text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  }
+  async function calcStreak(userId){
+    const logs = await getRecentLogs(userId, 60);
+    const set = new Set(logs.filter(r=>r.calories_consumed>0).map(r=>r.log_date));
+    let streak = 0;
+    let d = new Date();
+    const todayStr = d.toISOString().slice(0,10);
+    if(!set.has(todayStr)) d.setDate(d.getDate()-1);
+    while(true){
+      const ds = d.toISOString().slice(0,10);
+      if(set.has(ds)){ streak++; d.setDate(d.getDate()-1); } else break;
+    }
+    return streak;
+  }
+  function favKey(email){ return "hl_favs_" + btoa(unescape(encodeURIComponent(email))); }
+  function getFavs(email){ try{ return JSON.parse(localStorage.getItem(favKey(email))) || []; }catch(e){ return []; } }
+  function saveFavs(email, favs){ localStorage.setItem(favKey(email), JSON.stringify(favs)); }
+
+  // ================= router =================
+  const app = document.getElementById("app");
+  function nav(hash){ location.hash = hash; }
+  window.addEventListener("hashchange", render);
+
+  function layout(activePath, email, bodyHTML){
+    return `
+    <header class="bar"><div class="wrap barin">
+      <div class="brand"><span>●</span> Healthy Life</div>
+      <nav class="links">
+        ${["profile","results","tracker"].map(p=>`<a href="#/${p}" class="${activePath===p?'active':''}">${p==='profile'?'ข้อมูลสุขภาพ':p==='results'?'แดชบอร์ดผลลัพธ์':'บันทึกประจำวัน'}</a>`).join("")}
+      </nav>
+      <div class="userbox">
+        ${email ? `<span>${email}</span><a href="#/account" class="btn-ghost" style="display:inline-flex;align-items:center">⚙ บัญชี</a><button class="btn-ghost" onclick="hlSignOut()">ออกจากระบบ</button>`
+                 : `<a href="#/login" class="btn-ghost" style="display:inline-flex;align-items:center;background:var(--primary);color:var(--on-primary);font-weight:600">เข้าสู่ระบบ</a>`}
+      </div>
+    </div></header>
+    <main>${bodyHTML}</main>`;
+  }
+
+  window.hlSignOut = async function(){ await sb.auth.signOut(); nav("#/login"); render(); };
+  window.hlDisconnect = function(){ clearCfg(); sb = null; location.hash = ""; renderConnect(); };
+
+  async function render(){
+    app.className = "";
+    app.removeAttribute("style");
+    if(!sb){ renderConnect(); return; }
+    const { data:{ session } } = await sb.auth.getSession();
+    const user = session?.user || null;
+    let hash = location.hash.replace(/^#\/?/, "") || "";
+    if(hash === "") hash = user ? "profile" : "login";
+    if(hash === "login"){ renderLogin(user); return; }
+    if(!user){ nav("#/login"); return; }
+    if(hash === "profile"){ renderProfile(user); return; }
+    if(hash === "results"){ renderResults(user); return; }
+    if(hash === "account"){ renderAccount(user); return; }
+    if(hash === "tracker"){ renderTracker(user); return; }
+    nav("#/profile");
+  }
+
+  // ---------- CONNECT SCREEN ----------
+  function renderConnect(){
+    app.className = "";
+    app.innerHTML = `
+    <div class="loginwrap"><div class="loginbox" style="max-width:520px">
+      <div class="brand" style="margin-bottom:14px"><span>●</span> Healthy Life — เชื่อมต่อฐานข้อมูล</div>
+      <p class="muted" style="font-size:.9rem;margin:0 0 18px">
+        แอปนี้ใช้ <b>Supabase</b> เป็น backend (ฐานข้อมูล + ระบบล็อกอิน) เพื่อให้ใช้งานข้ามเครื่อง/อุปกรณ์ได้จริง
+        กรอก Project URL และ anon public key จากโปรเจกต์ Supabase ของคุณด้านล่าง (ดูวิธีตั้งค่าในไฟล์ <code>README-backend.md</code> ที่แนบมาด้วย)
+      </p>
+      <form id="cfgForm" class="stack">
+        <div><label>Supabase Project URL</label><input id="cUrl" placeholder="https://xxxxxxxx.supabase.co" required/></div>
+        <div><label>Supabase anon public key</label><input id="cKey" placeholder="eyJhbGciOi..." required/></div>
+        <div id="cErr"></div>
+        <button type="submit" class="btn-primary" style="width:100%">เชื่อมต่อและเริ่มใช้งาน →</button>
+      </form>
+    </div></div>`;
+    document.getElementById("cfgForm").onsubmit = async (e)=>{
+      e.preventDefault();
+      const url = document.getElementById("cUrl").value.trim();
+      const key = document.getElementById("cKey").value.trim();
+      const errBox = document.getElementById("cErr");
+      errBox.innerHTML = "";
+      try{
+        const testClient = window.supabase.createClient(url, key);
+        const { error } = await testClient.auth.getSession();
+        if(error) throw error;
+        setCfg(url, key);
+        sb = testClient;
+        nav("#/login");
+        render();
+      }catch(err){
+        errBox.innerHTML = `<p class="err">เชื่อมต่อไม่สำเร็จ ตรวจสอบ URL/key อีกครั้ง (${(err&&err.message)||err})</p>`;
+      }
+    };
+  }
+
+  // ---------- LOGIN ----------
+  async function renderLogin(user){
+    if(user){ nav("#/profile"); return; }
+    let mode = "signin";
+    function paint(err, ok){
+      app.innerHTML = `
+      <header class="bar"><div class="wrap barin"><div class="brand"><span>●</span> Healthy Life</div></div></header>
+      <div class="loginwrap"><div class="loginbox">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div class="brand"><span>●</span> Healthy Life</div>
+          <span class="badge">🔒 Supabase Auth</span>
+        </div>
+        <h1 class="disp" style="font-size:1.5rem;font-weight:700;margin:0 0 4px">${mode==="signin"?"เข้าสู่ระบบ Healthy Life":"สมัครสมาชิก Healthy Life"}</h1>
+        <p class="muted" style="margin:0 0 20px;font-size:.9rem">กรอกข้อมูลเพื่อเข้าสู่ระบบแดชบอร์ดสุขภาพและโภชนาการของคุณ</p>
+        <form id="loginForm" class="stack">
+          <div><label>อีเมลของคุณ *</label><input type="email" id="fEmail" required placeholder="yourname@example.com"/></div>
+          <div><label>รหัสผ่าน *</label><input type="password" id="fPass" required minlength="6" placeholder="ป้อนรหัสผ่านอย่างน้อย 6 ตัวอักษร"/></div>
+          ${err ? `<p class="err">${err}</p>` : ""}
+          ${ok ? `<p class="ok">${ok}</p>` : ""}
+          <button type="submit" class="btn-primary" style="width:100%" id="submitBtn">${mode==="signin"?"เข้าสู่ระบบ →":"สมัครสมาชิก →"}</button>
+        </form>
+        <button id="toggleMode" class="btn-ghost" style="width:100%;background:transparent;color:var(--primary);margin-top:14px">${mode==="signin"?"ยังไม่มีบัญชี? สมัครสมาชิก":"มีบัญชีอยู่แล้ว? เข้าสู่ระบบ"}</button>
+      </div></div>`;
+      document.getElementById("toggleMode").onclick = ()=>{ mode = mode==="signin"?"signup":"signin"; paint(null,null); };
+      document.getElementById("loginForm").onsubmit = async (e)=>{
+        e.preventDefault();
+        const email = document.getElementById("fEmail").value.trim();
+        const pass = document.getElementById("fPass").value;
+        document.getElementById("submitBtn").disabled = true;
+        if(mode === "signin"){
+          const { error } = await sb.auth.signInWithPassword({ email, password:pass });
+          if(error){ paint(error.message, null); } else { nav("#/profile"); render(); }
+        } else {
+          const { data, error } = await sb.auth.signUp({ email, password:pass });
+          if(error){ paint(error.message, null); }
+          else if(data.session){ nav("#/profile"); render(); }
+          else { mode = "signin"; paint(null, "สมัครสำเร็จ! กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชี แล้วเข้าสู่ระบบ"); }
+        }
+      };
+    }
+    paint(null, null);
+  }
+
+  // ---------- PROFILE ----------
+  async function renderProfile(user){
+    const existing = await getProfile(user.id) || {};
+    const state = {
+      sex: existing.sex || "female",
+      age: existing.age ?? 28,
+      height_cm: existing.height_cm ?? 168,
+      weight_kg: existing.weight_kg ?? 64.5,
+      goal_weight_kg: existing.goal_weight_kg ?? 60,
+      activity_level: existing.activity_level || "light",
+      goal: existing.goal || "lose"
+    };
+    function computed(){
+      const bmi = calcBMI(state.weight_kg, state.height_cm);
+      const cat = bmiCategory(bmi);
+      const bmr = calcBMR(state.sex, state.weight_kg, state.height_cm, state.age);
+      const tdee = calcTDEE(bmr, state.activity_level);
+      const goalCal = calcGoalCalories(tdee, state.goal);
+      return { bmi, cat, bmr, tdee, goalCal };
+    }
+    function paint(saving){
+      const c = computed();
+      app.innerHTML = layout("profile", user.email, `
+      <div class="wrap" style="padding:32px 16px">
+        <p style="color:var(--primary);font-size:.85rem;margin:0 0 2px">ขั้นตอนที่ 1 / 3</p>
+        <h1 class="disp" style="font-size:1.6rem;font-weight:700;margin:0 0 4px">บันทึกข้อมูลสรีระร่างกาย</h1>
+        <p class="muted" style="margin:0 0 22px">กรอกสัดส่วนและระดับกิจกรรมเพื่อคำนวณ BMI, BMR และ TDEE ตามมาตรฐานเวชศาสตร์การดำเนินชีวิต</p>
+        <form id="pform" class="grid3">
+          <div class="stack">
+            <section class="card">
+              <h2 class="disp" style="font-weight:600;margin:0 0 14px;font-size:1.05rem">เพศสภาพตามสรีรวิทยา (Biological Sex)</h2>
+              <div class="row3">
+                ${["male","female","other"].map(s=>`<button type="button" data-sex="${s}" class="pill ${state.sex===s?'sel':''}"><b>${s==='male'?'ชาย (Male)':s==='female'?'หญิง (Female)':'ไม่ระบุ'}</b></button>`).join("")}
+              </div>
+            </section>
+            <section class="card">
+              <h2 class="disp" style="font-weight:600;margin:0 0 14px;font-size:1.05rem">ข้อมูลสัดส่วนและอายุ</h2>
+              <div class="row3" style="grid-template-columns:1fr 1fr">
+                <div><label>อายุ (ปีบริบูรณ์)</label><input type="number" id="fAge" min="15" max="80" value="${state.age}"/></div>
+                <div><label>ส่วนสูง (ซม.)</label><input type="number" id="fHeight" min="120" max="220" value="${state.height_cm}"/></div>
+                <div><label>น้ำหนักปัจจุบัน (กก.)</label><input type="number" id="fWeight" step="0.1" value="${state.weight_kg}"/></div>
+                <div><label>น้ำหนักเป้าหมาย (กก.)</label><input type="number" id="fGoalWeight" step="0.1" value="${state.goal_weight_kg}"/></div>
+              </div>
+            </section>
+            <section class="card">
+              <h2 class="disp" style="font-weight:600;margin:0 0 14px;font-size:1.05rem">ระดับกิจกรรมทางกายภาพประจำวัน</h2>
+              <div class="stack" style="gap:8px">
+                ${Object.keys(ACTIVITY_LABELS).map(l=>`<button type="button" data-activity="${l}" class="pill ${state.activity_level===l?'sel':''}">${ACTIVITY_LABELS[l]}</button>`).join("")}
+              </div>
+            </section>
+            <section class="card">
+              <h2 class="disp" style="font-weight:600;margin:0 0 14px;font-size:1.05rem">เป้าหมายสุขภาพ</h2>
+              <div class="row3">
+                ${["lose","maintain","gain"].map(g=>`<button type="button" data-goal="${g}" class="pill ${state.goal===g?'sel':''}">${g==='lose'?'ลดไขมัน / ลดน้ำหนัก':g==='maintain'?'รักษาน้ำหนักและสมดุล':'เพิ่มกล้ามเนื้อ / บัลด์'}</button>`).join("")}
+              </div>
+            </section>
+          </div>
+          <aside class="stack">
+            <div class="card">
+              <p class="muted" style="font-size:.75rem;margin:0 0 4px">ดัชนีมวลกายคาดการณ์ (BMI)</p>
+              <p class="disp" style="font-size:2rem;font-weight:700;margin:0;color:${c.cat.color}">${c.bmi} <span class="muted" style="font-size:.9rem">kg/m²</span></p>
+              <p style="margin:4px 0 0;color:${c.cat.color};font-size:.9rem">${c.cat.label}</p>
+              <div class="row3" style="grid-template-columns:1fr 1fr;margin-top:14px">
+                <div class="kpi"><p>BMR พื้นฐาน</p><p>${c.bmr} kcal</p></div>
+                <div class="kpi"><p>TDEE เผาผลาญรวม</p><p>${c.tdee} kcal</p></div>
+              </div>
+              <div class="goalbox">
+                <p class="muted" style="font-size:.75rem;margin:0">พลังงานเป้าหมายต่อวัน (${state.goal})</p>
+                <p class="disp" style="font-size:1.3rem;font-weight:700;margin:2px 0 0;color:var(--primary)">${c.goalCal} kcal</p>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary" style="width:100%" ${saving?'disabled':''}>${saving?'กำลังบันทึก...':'คำนวณผลลัพธ์สุขภาพและไปต่อ →'}</button>
+          </aside>
+        </form>
+      </div>`);
+
+      app.querySelectorAll("[data-sex]").forEach(b=>b.onclick=()=>{ state.sex=b.dataset.sex; paint(false); });
+      app.querySelectorAll("[data-activity]").forEach(b=>b.onclick=()=>{ state.activity_level=b.dataset.activity; paint(false); });
+      app.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{ state.goal=b.dataset.goal; paint(false); });
+      ["fAge","fHeight","fWeight","fGoalWeight"].forEach(id=>{
+        document.getElementById(id).oninput = (e)=>{
+          const map = { fAge:"age", fHeight:"height_cm", fWeight:"weight_kg", fGoalWeight:"goal_weight_kg" };
+          state[map[id]] = Number(e.target.value);
+          const cc = computed();
+          const card = app.querySelector("aside .card");
+          card.querySelector("p.disp").innerHTML = `${cc.bmi} <span class="muted" style="font-size:.9rem">kg/m²</span>`;
+          card.querySelector("p.disp").style.color = cc.cat.color;
+        };
+      });
+      document.getElementById("pform").onsubmit = async (e)=>{
+        e.preventDefault();
+        paint(true);
+        const c2 = computed();
+        const { error } = await saveProfile(user.id, { ...state, bmi:c2.bmi, bmr:c2.bmr, tdee:c2.tdee, goal_calories:c2.goalCal });
+        if(error){ alert("บันทึกไม่สำเร็จ: " + error.message); paint(false); return; }
+        nav("#/results"); render();
+      };
+    }
+    paint(false);
+  }
+
+  // ---------- RESULTS ----------
+  async function renderResults(user){
+    const profile = await getProfile(user.id);
+    if(!profile){
+      app.innerHTML = layout("results", user.email, `
+      <div class="wrap" style="max-width:600px;padding:60px 16px;text-align:center">
+        <p class="muted" style="margin-bottom:16px">ยังไม่มีข้อมูลสุขภาพของคุณ</p>
+        <a href="#/profile" class="btn-primary" style="display:inline-flex;align-items:center">กรอกข้อมูลสรีระ →</a>
+      </div>`);
+      return;
+    }
+    const cat = bmiCategory(profile.bmi);
+    const macros = calcMacros(profile.goal_calories);
+    const weightDiff = +(profile.weight_kg - profile.goal_weight_kg).toFixed(1);
+    const weeksToGoal = weightDiff !== 0 ? Math.ceil(Math.abs(weightDiff)/0.5) : 0;
+    const recent = await getRecentLogs(user.id, 7);
+    const maxCal = Math.max(profile.goal_calories, ...recent.map(r=>r.calories_consumed), 1);
+    const dayLabel = (iso)=>["อา","จ","อ","พ","พฤ","ศ","ส"][new Date(iso+"T00:00:00").getDay()];
+
+    app.innerHTML = layout("results", user.email, `
+    <div class="wrap" style="padding:32px 16px">
+      <h1 class="disp" style="font-size:1.6rem;font-weight:700;margin:0 0 4px">ผลการประเมินสุขภาพของคุณ</h1>
+      <p class="muted" style="margin:0 0 22px">สรุปการคำนวณดัชนีมวลกาย (BMI) ตามมาตรฐานประชากรเอเชีย และอัตราการเผาผลาญพลังงานรายวัน (TDEE)</p>
+      <div class="grid3" style="margin-bottom:24px">
+        <div class="card">
+          <p class="muted" style="font-size:.75rem;margin:0 0 4px">ดัชนีมวลกาย</p>
+          <h2 class="disp" style="font-weight:600;margin:0 0 10px;font-size:1rem">Body Mass Index (BMI)</h2>
+          <p class="disp" style="font-size:2.2rem;font-weight:700;margin:0;color:${cat.color}">${profile.bmi} <span class="muted" style="font-size:1rem">kg/m²</span></p>
+          <p style="margin:6px 0 0;color:${cat.color};font-size:.9rem">● ${cat.label}</p>
+        </div>
+        <div class="card">
+          <p class="muted" style="font-size:.75rem;margin:0 0 4px">อัตราการใช้พลังงาน</p>
+          <h2 class="disp" style="font-weight:600;margin:0 0 10px;font-size:1rem">TDEE & BMR Analysis</h2>
+          <div style="display:flex;align-items:center;gap:20px">
+            <div class="ring"><b>${profile.tdee}</b><small>kcal / วัน</small></div>
+            <div style="font-size:.9rem">
+              <p style="margin:0 0 6px">BMR พื้นฐาน: <b>${profile.bmr}</b> kcal</p>
+              <p style="margin:0">เป้าหมาย (${profile.goal}): <b style="color:var(--primary)">${profile.goal_calories}</b> kcal</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section class="card" style="margin-bottom:24px">
+        <h2 class="disp" style="font-weight:600;margin:0 0 14px;font-size:1.05rem">สัดส่วนสารอาหารหลัก (Macronutrients)</h2>
+        <div class="macros">
+          <div><b style="color:var(--primary)">${macros.proteinG}g</b><span class="muted" style="font-size:.75rem">โปรตีน (Protein)</span></div>
+          <div><b style="color:var(--secondary)">${macros.carbsG}g</b><span class="muted" style="font-size:.75rem">คาร์โบไฮเดรต (Carbs)</span></div>
+          <div><b style="color:var(--tertiary)">${macros.fatG}g</b><span class="muted" style="font-size:.75rem">ไขมัน (Fat)</span></div>
+        </div>
+      </section>
+      <section class="card" style="margin-bottom:24px">
+        <h2 class="disp" style="font-weight:600;margin:0 0 4px;font-size:1.05rem">แนวโน้มแคลอรี 7 วันย้อนหลัง</h2>
+        <p class="muted" style="margin:0;font-size:.8rem">เทียบกับเป้าหมาย ${profile.goal_calories} kcal/วัน (แถบสีฟ้า = เกินเป้าหมาย)</p>
+        ${recent.length===0 ? `<p class="muted" style="margin-top:14px;font-size:.9rem">ยังไม่มีข้อมูลบันทึกในช่วง 7 วันนี้ ไปที่ Daily Tracker เพื่อเริ่มบันทึก</p>` : `
+        <div class="trendchart">
+          ${recent.map(r=>{
+            const h = Math.max(2, Math.round((r.calories_consumed/maxCal)*100));
+            const over = r.calories_consumed > profile.goal_calories;
+            return `<div class="trendbar"><div class="fill ${over?'over':''}" style="height:${h}%"><span class="val">${r.calories_consumed}</span></div></div>`;
+          }).join("")}
+        </div>
+        <div class="trendlbl">${recent.map(r=>`<span>${dayLabel(r.log_date)}</span>`).join("")}</div>`}
+      </section>
+
+      <section class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+        <div>
+          <p style="color:var(--primary);font-size:.85rem;margin:0 0 4px">การคาดการณ์ผลลัพธ์สุขภาพ</p>
+          <p style="margin:0">ด้วยเป้าหมายนี้ คุณจะบรรลุน้ำหนักเป้าหมาย <b>${profile.goal_weight_kg} กก.</b> ได้อย่างปลอดภัยภายในประมาณ <b style="color:var(--primary)">${weeksToGoal||0} สัปดาห์</b></p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button id="exportBtn" class="btn-ghost">⬇ ส่งออก CSV (30 วัน)</button>
+          <a href="#/tracker" class="btn-primary" style="display:inline-flex;align-items:center">เริ่มบันทึกใน Daily Tracker →</a>
+        </div>
+      </section>
+    </div>`);
+    document.getElementById("exportBtn").onclick = async ()=>{
+      const rows = await getLogsForExport(user.id, 30);
+      downloadCSV(rows, "healthy-life-export.csv");
+    };
+  }
+
+  // ---------- ACCOUNT ----------
+  async function renderAccount(user){
+    function paint(msg, isErr, saving){
+      app.innerHTML = layout("account", user.email, `
+      <div class="wrap" style="max-width:520px;padding:32px 16px">
+        <h1 class="disp" style="font-size:1.6rem;font-weight:700;margin:0 0 4px">บัญชีของฉัน</h1>
+        <p class="muted" style="margin:0 0 22px">อีเมลที่ใช้เข้าสู่ระบบ: <b>${user.email}</b></p>
+        <section class="card">
+          <h2 class="disp" style="font-weight:600;margin:0 0 14px;font-size:1.05rem">เปลี่ยนรหัสผ่าน</h2>
+          <form id="pwForm" class="stack">
+            <div><label>รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)</label><input type="password" id="fNewPw" minlength="6" required/></div>
+            <div><label>ยืนยันรหัสผ่านใหม่</label><input type="password" id="fConfirmPw" minlength="6" required/></div>
+            ${msg ? `<p class="${isErr?'err':'ok'}">${msg}</p>` : ""}
+            <button type="submit" class="btn-primary" style="width:100%" ${saving?'disabled':''}>${saving?'กำลังบันทึก...':'บันทึกรหัสผ่านใหม่'}</button>
+          </form>
+        </section>
+        <section class="card" style="margin-top:20px;text-align:center">
+          <h2 class="disp" style="font-weight:600;margin:0 0 6px;font-size:1.05rem">แชร์แอปด้วย QR Code</h2>
+          <p class="muted" style="margin:0 0 16px;font-size:.85rem">ให้คนอื่นสแกนเพื่อเปิดแอปนี้ได้ทันที</p>
+          <div id="qrbox" style="display:flex;justify-content:center;background:#fff;border-radius:14px;padding:16px;width:fit-content;margin:0 auto"></div>
+        </section>
+      </div>`);
+      if(window.QRCode){
+        document.getElementById("qrbox").innerHTML = "";
+        new QRCode(document.getElementById("qrbox"), {
+          text: "https://claude.ai/artifact/AUz1FvYn9NfgtnHN39CLc3",
+          width: 200, height: 200, colorDark:"#0b1326", colorLight:"#ffffff"
+        });
+      }
+      document.getElementById("pwForm").onsubmit = async (e)=>{
+        e.preventDefault();
+        const p1 = document.getElementById("fNewPw").value;
+        const p2 = document.getElementById("fConfirmPw").value;
+        if(p1 !== p2){ paint("รหัสผ่านทั้งสองช่องไม่ตรงกัน", true, false); return; }
+        paint(null, false, true);
+        const { error } = await sb.auth.updateUser({ password: p1 });
+        if(error){ paint(error.message, true, false); }
+        else{ paint("เปลี่ยนรหัสผ่านสำเร็จแล้ว", false, false); }
+      };
+    }
+    paint(null, false, false);
+  }
+
+  // ---------- TRACKER ----------
+  async function renderTracker(user){
+    const profile = await getProfile(user.id);
+    const goalCalories = profile?.goal_calories || 2000;
+    let date = todayISO();
+    let log = await getLog(user.id, date);
+    let entries = await getEntries(log.id);
+    let entryType = "meal";
+    let favs = getFavs(user.email);
+    let streak = await calcStreak(user.id);
+
+    function paint(saving){
+      const pct = Math.min(100, Math.round((log.calories_consumed / (goalCalories||1)) * 100));
+      app.innerHTML = layout("tracker", user.email, `
+      <div class="wrap" style="padding:32px 16px">
+        <div class="trkhead">
+          <div>
+            <h1 class="disp" style="font-size:1.6rem;font-weight:700;margin:0 0 4px">บันทึกสุขภาพประจำวัน ${streak>0?`<span style="font-size:1rem;color:var(--secondary)">🔥 ${streak} วันติดต่อกัน</span>`:''}</h1>
+            <p class="muted" style="margin:0;font-size:.9rem">ติดตามแคลอรี น้ำ การนอน และการออกกำลังกายของคุณ</p>
+          </div>
+          <input type="date" id="fDate" class="datein" value="${date}"/>
+        </div>
+        <form id="logForm" class="row3" style="grid-template-columns:repeat(4,1fr);margin-bottom:26px">
+          <div class="card" style="padding:16px">
+            <p class="muted" style="font-size:.75rem;margin:0 0 4px">แคลอรีวันนี้</p>
+            <p class="disp" style="font-size:1.4rem;font-weight:700;margin:0">${log.calories_consumed} <span class="muted" style="font-size:.7rem">/ ${goalCalories} kcal</span></p>
+            <div class="bar-outer"><div class="bar-inner" style="width:${pct}%"></div></div>
+            <input type="number" id="fCal" value="${log.calories_consumed}" style="margin-top:10px;height:36px;font-size:.85rem"/>
+          </div>
+          <div class="card" style="padding:16px">
+            <p class="muted" style="font-size:.75rem;margin:0 0 4px">น้ำดื่ม (มล.)</p>
+            <p class="disp" style="font-size:1.4rem;font-weight:700;margin:0">${log.water_ml}</p>
+            <input type="number" id="fWater" value="${log.water_ml}" style="margin-top:10px;height:36px;font-size:.85rem"/>
+          </div>
+          <div class="card" style="padding:16px">
+            <p class="muted" style="font-size:.75rem;margin:0 0 4px">การนอนหลับ (ชม.)</p>
+            <p class="disp" style="font-size:1.4rem;font-weight:700;margin:0">${log.sleep_hours}</p>
+            <input type="number" step="0.5" id="fSleep" value="${log.sleep_hours}" style="margin-top:10px;height:36px;font-size:.85rem"/>
+          </div>
+          <div class="card" style="padding:16px">
+            <p class="muted" style="font-size:.75rem;margin:0 0 4px">ออกกำลังกาย (นาที)</p>
+            <p class="disp" style="font-size:1.4rem;font-weight:700;margin:0">${log.exercise_minutes}</p>
+            <input type="number" id="fExMin" value="${log.exercise_minutes}" style="margin-top:10px;height:36px;font-size:.85rem"/>
+          </div>
+          <div style="grid-column:1/-1;display:flex;justify-content:flex-end">
+            <button type="submit" class="btn-primary" ${saving?'disabled':''}>${saving?'กำลังบันทึก...':'✓ บันทึกข้อมูลประจำวัน'}</button>
+          </div>
+        </form>
+        <section class="card">
+          <h2 class="disp" style="font-weight:600;margin:0 0 16px;font-size:1.05rem">บันทึกอาหารและกิจกรรม</h2>
+          ${favs.length>0 ? `<div class="quickrow" style="flex-wrap:wrap">
+            ${favs.map((f,i)=>`<button type="button" class="pill" style="width:auto;padding:8px 12px;display:flex;align-items:center;gap:6px" data-fav="${i}">
+              <span>${f.type==='meal'?'🍽':'🏃'} ${f.title} (${f.calories} kcal)</span>
+              <span data-delfav="${i}" style="color:var(--error);font-weight:700">×</span>
+            </button>`).join("")}
+          </div>` : ``}
+          <div class="quickrow">
+            <select id="fType"><option value="meal">มื้ออาหาร</option><option value="exercise">การออกกำลังกาย</option></select>
+            <input id="fTitle" placeholder="ชื่อรายการ เช่น ข้าวไก่ผัดกะเพรา"/>
+            <input id="fKcal" type="number" placeholder="kcal" style="max-width:110px"/>
+            <button id="saveFavBtn" type="button" class="btn-ghost" title="บันทึกเป็นรายการโปรด">☆</button>
+            <button id="addBtn" class="btn-sub">+ เพิ่มรายการ</button>
+          </div>
+          <ul class="entries">
+            ${entries.length===0 ? `<li class="muted" style="font-size:.9rem">ยังไม่มีรายการสำหรับวันนี้</li>` :
+              entries.map(e=>`<li data-id="${e.id}">
+                <div><span class="tag">${e.entry_type==='meal'?'🍽 มื้ออาหาร':'🏃 ออกกำลังกาย'}</span>${e.title}</div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <b class="disp">${e.calories} kcal</b>
+                  <button data-del="${e.id}" style="background:none;border:none;color:var(--error);font-size:.85rem">ลบ</button>
+                </div>
+              </li>`).join("")}
+          </ul>
+        </section>
+      </div>`);
+
+      document.getElementById("fDate").onchange = async (e)=>{
+        date = e.target.value; log = await getLog(user.id,date); entries = await getEntries(log.id); paint(false);
+      };
+      document.getElementById("logForm").onsubmit = async (e)=>{
+        e.preventDefault();
+        log.calories_consumed = Number(document.getElementById("fCal").value);
+        log.water_ml = Number(document.getElementById("fWater").value);
+        log.sleep_hours = Number(document.getElementById("fSleep").value);
+        log.exercise_minutes = Number(document.getElementById("fExMin").value);
+        const saved = await saveLog(user.id, date, log);
+        if(saved) log = saved;
+        paint(false);
+      };
+      document.getElementById("fType").onchange = (e)=>{ entryType = e.target.value; };
+      document.getElementById("saveFavBtn").onclick = ()=>{
+        const title = document.getElementById("fTitle").value.trim();
+        const kcal = Number(document.getElementById("fKcal").value) || 0;
+        if(!title) return;
+        favs.push({ title, calories:kcal, type:entryType });
+        saveFavs(user.email, favs);
+        paint(false);
+      };
+      app.querySelectorAll("[data-delfav]").forEach(el=>{
+        el.onclick = (ev)=>{
+          ev.stopPropagation();
+          favs.splice(Number(el.dataset.delfav), 1);
+          saveFavs(user.email, favs);
+          paint(false);
+        };
+      });
+      app.querySelectorAll("[data-fav]").forEach(btn=>{
+        btn.onclick = async (ev)=>{
+          if(ev.target.hasAttribute("data-delfav")) return;
+          const f = favs[Number(btn.dataset.fav)];
+          if(!log.id){ const saved = await saveLog(user.id, date, log); if(saved) log = saved; }
+          const entry = await addEntry(user.id, log.id, f.type, f.title, f.calories);
+          if(entry) entries.push(entry);
+          if(f.type === "meal") log.calories_consumed += f.calories; else log.exercise_kcal += f.calories;
+          await saveLog(user.id, date, log);
+          paint(false);
+        };
+      });
+      document.getElementById("addBtn").onclick = async ()=>{
+        const title = document.getElementById("fTitle").value.trim();
+        const kcal = Number(document.getElementById("fKcal").value) || 0;
+        if(!title) return;
+        if(!log.id){ const saved = await saveLog(user.id, date, log); if(saved) log = saved; }
+        const entry = await addEntry(user.id, log.id, entryType, title, kcal);
+        if(entry) entries.push(entry);
+        if(entryType === "meal") log.calories_consumed += kcal; else log.exercise_kcal += kcal;
+        await saveLog(user.id, date, log);
+        paint(false);
+      };
+      app.querySelectorAll("[data-del]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const id = btn.dataset.del;
+          const entry = entries.find(x=>x.id===id);
+          await deleteEntry(id);
+          entries = entries.filter(x=>x.id!==id);
+          if(entry){
+            if(entry.entry_type==="meal") log.calories_consumed = Math.max(0, log.calories_consumed - entry.calories);
+            else log.exercise_kcal = Math.max(0, log.exercise_kcal - entry.calories);
+            await saveLog(user.id, date, log);
+          }
+          paint(false);
+        };
+      });
+    }
+    paint(false);
+  }
+
+  // ================= boot =================
+  // ฝัง URL/anon key ของโปรเจกต์ไว้ล่วงหน้า ไม่ต้องกรอกซ้ำ
+  const SUPABASE_URL = "https://pyqqdxacicpjfqnymbto.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5cXFkeGFjaWNwamZxbnltYnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxNTg0MzcsImV4cCI6MjEwNTczNDQzN30.nS80sxKHnsTdHEh-K1RA603LqgsJBAhk3kZ6DBwEFdo";
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  sb.auth.onAuthStateChange(()=>{ render(); });
+  render();
+})();
+</script>
+</body>
+</html>
