@@ -11,15 +11,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root{
-    --background:#f4f8fc;--surface:#ffffff;--surface-low:#eaf2fb;--surface-high:#dcebfa;--surface-highest:#cfe3f7;
-    --border:#dce8f5;--on-surface:#0f2438;--on-surface-variant:#5b7793;
+    --background:#f4f8fc;--surface:#ffffff;--surface-low:#eaf2fb;--surface-high:#d5e6f9;--surface-highest:#c2dbf5;
+    --border:#cfe0f2;--on-surface:#0f2438;--on-surface-variant:#4c6a86;
     --primary:#2f8dff;--on-primary:#ffffff;--secondary:#22b8cf;--tertiary:#5b6bff;--error:#e5484d;
+    --amber:#f59e0b;--green:#22c55e;--pink:#ec4899;
     padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
   }
   :root[data-theme="dark"]{
-    --background:#0b1626;--surface:#122031;--surface-low:#0e1a2a;--surface-high:#1a2c40;--surface-highest:#22384f;
-    --border:#22384f;--on-surface:#e7f1fb;--on-surface-variant:#8ea6bd;
-    --primary:#4fa3ff;--on-primary:#00223f;--secondary:#22b8cf;--tertiary:#7c8bff;--error:#ff8a80;
+    --background:#0b1626;--surface:#122031;--surface-low:#0e1a2a;--surface-high:#213850;--surface-highest:#2b4661;
+    --border:#28405a;--on-surface:#e7f1fb;--on-surface-variant:#9db4cb;
+    --primary:#4fa3ff;--on-primary:#00223f;--secondary:#3fd0e5;--tertiary:#8b98ff;--error:#ff8a80;
+    --amber:#fbbf24;--green:#4ade80;--pink:#f472b6;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--background);color:var(--on-surface);font-family:'Plus Jakarta Sans',sans-serif;min-height:100%;padding-bottom:76px;}
@@ -84,7 +86,7 @@
   .trendchart{display:flex;align-items:flex-end;gap:8px;height:150px;margin-top:14px}
   .trendbar{flex:1;background:var(--surface-low);border-radius:8px 8px 0 0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
   .trendbar .fill{background:var(--primary);border-radius:8px 8px 0 0;width:100%;min-height:2px}
-  .trendbar .fill.over{background:var(--tertiary)}
+  .trendbar .fill.over{background:var(--amber)}
   .trendbar .val{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:.65rem;color:var(--on-surface-variant)}
   .trendlbl{display:flex;gap:8px;margin-top:6px}
   .trendlbl span{flex:1;text-align:center;font-size:.68rem;color:var(--on-surface-variant)}
@@ -102,6 +104,27 @@
   .macrorow .mdot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
   /* bottom tab bar (mobile) */
   .tabbar{display:none}
+  /* chatbot widget */
+  .chatfab{position:fixed;right:20px;bottom:24px;width:58px;height:58px;border-radius:50%;background:var(--primary);
+    color:var(--on-primary);border:none;font-size:1.5rem;box-shadow:0 10px 24px -10px rgba(47,141,255,.6);z-index:20;cursor:pointer}
+  .chatpanel{position:fixed;right:20px;bottom:92px;width:320px;max-width:calc(100vw - 32px);height:440px;max-height:65vh;
+    background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:0 16px 40px -16px rgba(15,36,56,.35);
+    z-index:20;display:none;flex-direction:column;overflow:hidden}
+  .chatpanel.open{display:flex}
+  .chathead{background:var(--primary);color:var(--on-primary);padding:12px 16px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+  .chatbody{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface-low)}
+  .chatmsg{max-width:80%;padding:8px 12px;border-radius:14px;font-size:.85rem;line-height:1.4}
+  .chatmsg.bot{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--on-surface)}
+  .chatmsg.me{align-self:flex-end;background:var(--primary);color:var(--on-primary)}
+  .chatchips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 10px}
+  .chatchips button{font-size:.72rem;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--on-surface-variant)}
+  .chatinputrow{display:flex;gap:6px;padding:10px;border-top:1px solid var(--border)}
+  .chatinputrow input{height:38px;font-size:.85rem}
+  .chatinputrow button{width:38px;height:38px;border-radius:50%;background:var(--primary);color:var(--on-primary);border:none;flex-shrink:0}
+  @media (max-width:760px){
+    .chatfab{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+    .chatpanel{bottom:calc(146px + env(safe-area-inset-bottom,0px))}
+  }
   @media (max-width:760px){
     header.bar nav.links{display:none}
     .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--border);
@@ -144,10 +167,10 @@
   const GOAL_ADJUSTMENT = { lose:-400, maintain:0, gain:350 };
   function calcBMI(w,h){ const m=h/100; if(m<=0) return 0; return +(w/(m*m)).toFixed(1); }
   function bmiCategory(bmi){
-    if(bmi<18.5) return { label:"น้ำหนักน้อย", color:"#38bdf8" };
-    if(bmi<23) return { label:"สมส่วน (Normal)", color:"#2dd4bf" };
-    if(bmi<25) return { label:"น้ำหนักเกิน", color:"#facc15" };
-    return { label:"โรคอ้วน", color:"#fb7185" };
+    if(bmi<18.5) return { label:"น้ำหนักน้อย", color:"var(--secondary)" };
+    if(bmi<23) return { label:"สมส่วน (Normal)", color:"var(--green)" };
+    if(bmi<25) return { label:"น้ำหนักเกิน", color:"var(--amber)" };
+    return { label:"โรคอ้วน", color:"var(--error)" };
   }
   function calcBMR(sex,w,h,age){
     const base = 10*w + 6.25*h - 5*age;
@@ -223,6 +246,110 @@
     return streak;
   }
   function favKey(email){ return "hl_favs_" + btoa(unescape(encodeURIComponent(email))); }
+
+  // ================= chatbot (rule-based, no external API) =================
+  const ENCOURAGE = [
+    "สู้ๆ นะ! ทุกก้าวเล็กๆ ที่บันทึกวันนี้ คือความก้าวหน้าของพรุ่งนี้ 💪",
+    "อย่ากดดันตัวเองมากไป แค่ทำต่อเนื่องก็เก่งมากแล้ว 🌱",
+    "พักได้ แต่อย่าหยุด กลับมาบันทึกใหม่ได้เสมอนะ 🔥"
+  ];
+  async function botReply(user, textRaw){
+    const t = textRaw.toLowerCase();
+    try{
+      if(/สวัสดี|hello|hi/.test(t)) return "สวัสดีค่ะ/ครับ! ถามเรื่องแคลอรี, BMI, น้ำ, การนอน, ออกกำลังกาย หรือ streak ได้เลย 😊";
+      if(/วิธีใช้|help|ใช้ยังไง/.test(t)) return "เริ่มจากหน้า 'ข้อมูลสุขภาพ' กรอกสัดส่วนก่อน ระบบจะคำนวณ BMI/TDEE ให้ จากนั้นไปที่ 'บันทึกประจำวัน' เพื่อบันทึกแคลอรี น้ำ การนอน และการออกกำลังกายในแต่ละวันได้เลย";
+      if(/กำลังใจ|ท้อ|เหนื่อย|หมดแรง/.test(t)) return ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)];
+      if(/streak|ติดต่อกัน|ขยัน/.test(t)){
+        const s = await calcStreak(user.id);
+        return s>0 ? `ตอนนี้คุณบันทึกต่อเนื่อง ${s} วันแล้ว เก่งมาก! 🔥 พยายามรักษาสถิตินี้ต่อไปนะ` : "ยังไม่มี streak ตอนนี้ ลองเริ่มบันทึกวันนี้เพื่อเริ่มนับต่อเนื่องได้เลย";
+      }
+      if(/bmi|ดัชนีมวลกาย/.test(t)){
+        const p = await getProfile(user.id);
+        if(!p) return "ยังไม่มีข้อมูลสรีระของคุณเลย ไปกรอกที่หน้า 'ข้อมูลสุขภาพ' ก่อนนะ";
+        const cat = bmiCategory(p.bmi);
+        return `BMI ของคุณคือ ${p.bmi} kg/m² อยู่ในเกณฑ์ "${cat.label}"`;
+      }
+      if(/เป้าหมายแคล|เป้าหมายพลังงาน|goal.?cal/.test(t)){
+        const p = await getProfile(user.id);
+        if(!p) return "ยังไม่มีข้อมูลสรีระของคุณเลย ไปกรอกที่หน้า 'ข้อมูลสุขภาพ' ก่อนนะ";
+        return `เป้าหมายพลังงานต่อวันของคุณคือ ${p.goal_calories} kcal (ตามเป้าหมาย: ${p.goal})`;
+      }
+      if(/น้ำหนักเป้าหมาย/.test(t)){
+        const p = await getProfile(user.id);
+        return p ? `น้ำหนักเป้าหมายของคุณคือ ${p.goal_weight_kg} กก. (ปัจจุบัน ${p.weight_kg} กก.)` : "ยังไม่มีข้อมูลสรีระเลย ไปกรอกที่หน้า 'ข้อมูลสุขภาพ' ก่อนนะ";
+      }
+      if(/แคล|กินไป|บริโภค/.test(t)){
+        const p = await getProfile(user.id);
+        const log = await getLog(user.id, todayISO());
+        const goal = p?.goal_calories || 2000;
+        return `วันนี้คุณบริโภคไปแล้ว ${log.calories_consumed} kcal จากเป้าหมาย ${goal} kcal (เหลืออีก ${Math.max(0,goal-log.calories_consumed)} kcal)`;
+      }
+      if(/น้ำ/.test(t)){
+        const log = await getLog(user.id, todayISO());
+        return `วันนี้คุณดื่มน้ำไปแล้ว ${log.water_ml} มล.`;
+      }
+      if(/นอน/.test(t)){
+        const log = await getLog(user.id, todayISO());
+        return `คืนที่ผ่านมาคุณนอนไป ${log.sleep_hours} ชั่วโมง`;
+      }
+      if(/ออกกำลังกาย/.test(t)){
+        const log = await getLog(user.id, todayISO());
+        return `วันนี้คุณออกกำลังกายไปแล้ว ${log.exercise_minutes} นาที เผาผลาญ ${log.exercise_kcal||0} kcal`;
+      }
+      return "ขอโทษด้วย ยังไม่เข้าใจคำถามนี้ ลองถามเกี่ยวกับ แคลอรี, BMI, น้ำ, การนอน, ออกกำลังกาย, เป้าหมาย, streak หรือพิมพ์ 'วิธีใช้' ได้เลย";
+    }catch(e){ return "ขอโทษด้วย ดึงข้อมูลไม่สำเร็จ ลองใหม่อีกครั้งนะ"; }
+  }
+  let chatMounted = false;
+  function mountChatbot(user){
+    if(chatMounted) return;
+    chatMounted = true;
+    const fab = document.createElement("button");
+    fab.className = "chatfab"; fab.id = "chatFab"; fab.textContent = "💬";
+    const panel = document.createElement("div");
+    panel.className = "chatpanel"; panel.id = "chatPanel";
+    panel.innerHTML = `
+      <div class="chathead"><span>🤖 ผู้ช่วยสุขภาพ</span><button style="background:none;border:none;color:#fff;font-size:1.1rem" id="chatCloseBtn">×</button></div>
+      <div class="chatbody" id="chatBody">
+        <div class="chatmsg bot">สวัสดีค่ะ/ครับ! ถามเรื่องแคลอรี, BMI, น้ำ, การนอน, streak หรือขอกำลังใจได้เลย</div>
+      </div>
+      <div class="chatchips" id="chatChips">
+        ${["วันนี้กินไปกี่แคล","BMI ของฉันเท่าไหร่","streak กี่วันแล้ว","ขอกำลังใจหน่อย"].map(q=>`<button data-q="${q}">${q}</button>`).join("")}
+      </div>
+      <div class="chatinputrow">
+        <input id="chatInput" placeholder="พิมพ์คำถาม..."/>
+        <button id="chatSendBtn">➤</button>
+      </div>`;
+    document.body.appendChild(fab);
+    document.body.appendChild(panel);
+    fab.onclick = ()=> panel.classList.toggle("open");
+    panel.querySelector("#chatCloseBtn").onclick = ()=> panel.classList.remove("open");
+    const body = panel.querySelector("#chatBody");
+    function addMsg(text, who){
+      const d = document.createElement("div");
+      d.className = "chatmsg " + who; d.textContent = text;
+      body.appendChild(d); body.scrollTop = body.scrollHeight;
+    }
+    async function handleSend(text){
+      if(!text.trim()) return;
+      addMsg(text, "me");
+      const reply = await botReply(user, text);
+      addMsg(reply, "bot");
+    }
+    panel.querySelector("#chatSendBtn").onclick = ()=>{
+      const inp = panel.querySelector("#chatInput");
+      const v = inp.value; inp.value = ""; handleSend(v);
+    };
+    panel.querySelector("#chatInput").onkeydown = (e)=>{
+      if(e.key === "Enter"){ const v=e.target.value; e.target.value=""; handleSend(v); }
+    };
+    panel.querySelectorAll("[data-q]").forEach(b=>{ b.onclick = ()=> handleSend(b.dataset.q); });
+  }
+  function unmountChatbot(){
+    if(!chatMounted) return;
+    chatMounted = false;
+    document.getElementById("chatFab")?.remove();
+    document.getElementById("chatPanel")?.remove();
+  }
   function getFavs(email){ try{ return JSON.parse(localStorage.getItem(favKey(email))) || []; }catch(e){ return []; } }
   function saveFavs(email, favs){ localStorage.setItem(favKey(email), JSON.stringify(favs)); }
 
@@ -271,6 +398,7 @@
     if(!sb){ renderConnect(); applyTheme(); return; }
     const { data:{ session } } = await sb.auth.getSession();
     const user = session?.user || null;
+    if(user) mountChatbot(user); else unmountChatbot();
     let hash = location.hash.replace(/^#\/?/, "") || "";
     if(hash === "") hash = user ? "profile" : "login";
     if(hash === "login"){ await renderLogin(user); applyTheme(); return; }
@@ -509,8 +637,8 @@
         <h2 class="disp" style="font-weight:600;margin:0 0 14px;font-size:1.05rem">สัดส่วนสารอาหารหลัก (Macronutrients)</h2>
         <div class="macros">
           <div><b style="color:var(--primary)">${macros.proteinG}g</b><span class="muted" style="font-size:.75rem">โปรตีน (Protein)</span></div>
-          <div><b style="color:var(--secondary)">${macros.carbsG}g</b><span class="muted" style="font-size:.75rem">คาร์โบไฮเดรต (Carbs)</span></div>
-          <div><b style="color:var(--tertiary)">${macros.fatG}g</b><span class="muted" style="font-size:.75rem">ไขมัน (Fat)</span></div>
+          <div><b style="color:var(--amber)">${macros.carbsG}g</b><span class="muted" style="font-size:.75rem">คาร์โบไฮเดรต (Carbs)</span></div>
+          <div><b style="color:var(--pink)">${macros.fatG}g</b><span class="muted" style="font-size:.75rem">ไขมัน (Fat)</span></div>
         </div>
       </section>
       <section class="card" style="margin-bottom:24px">
@@ -624,8 +752,8 @@
             </div>
             <div class="macrorow">
               <div class="mchip"><span class="mdot" style="background:var(--primary)"></span><b class="disp">${log.calories_consumed}</b><div class="muted" style="font-size:.72rem">บริโภคแล้ว</div></div>
-              <div class="mchip"><span class="mdot" style="background:var(--tertiary)"></span><b class="disp">${goalCalories}</b><div class="muted" style="font-size:.72rem">เป้าหมาย</div></div>
-              <div class="mchip"><span class="mdot" style="background:var(--secondary)"></span><b class="disp">${log.exercise_kcal||0}</b><div class="muted" style="font-size:.72rem">เผาผลาญ</div></div>
+              <div class="mchip"><span class="mdot" style="background:var(--border);border:2px solid var(--on-surface-variant)"></span><b class="disp">${goalCalories}</b><div class="muted" style="font-size:.72rem">เป้าหมาย</div></div>
+              <div class="mchip"><span class="mdot" style="background:var(--green)"></span><b class="disp">${log.exercise_kcal||0}</b><div class="muted" style="font-size:.72rem">เผาผลาญ</div></div>
             </div>
           </div>
         </section>
